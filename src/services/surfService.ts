@@ -1,4 +1,4 @@
-import surfSpots, { SurfSpot } from '@/components/SurfMap';
+import { surfSpots, type SurfSpot } from '@/lib/spots';
 
 // Vite env variables declaration
 interface ImportMetaEnv {
