@@ -1,0 +1,36 @@
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Routes, Route } from "react-router-dom";
+import Index from "./pages/Index";
+import MapPage from "./pages/MapPage";
+import FavoritesPage from "./pages/FavoritesPage";
+import AccountPage from "./pages/AccountPage";
+import NotFound from "./pages/NotFound";
+import InstallPrompt from "./components/InstallPrompt";
+import MobileNavigation from "./components/MobileNavigation";
+
+const queryClient = new QueryClient();
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/mapa" element={<MapPage />} />
+        <Route path="/favoritas" element={<FavoritesPage />} />
+        <Route path="/cuenta" element={<AccountPage />} />
+        <Route path="/surf-espana" element={<Index />} />
+        <Route path="/espana" element={<Index />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <MobileNavigation />
+      <InstallPrompt />
+    </TooltipProvider>
+  </QueryClientProvider>
+);
+
+export default App;

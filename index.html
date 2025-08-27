@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Surf España - Alertas y Condiciones de Surf en Tiempo Real</title>
+    <meta name="description" content="Descubre las mejores condiciones de surf en España. Alertas en tiempo real, previsiones horarias y condiciones actuales de todos los spots españoles: País Vasco, Cantabria, Asturias, Galicia, Canarias y más." />
+    <meta name="author" content="Surf España" />
+    <meta name="keywords" content="surf, españa, mundaka, pantin, zarautz, sopelana, el quemao, tarifa, famara, olas, viento, condiciones, previsión, alertas, país vasco, cantabria, asturias, galicia, canarias, andalucia" />
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#2563eb" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Surf España" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:title" content="Surf España - Alertas y Condiciones de Surf" />
+    <meta property="og:description" content="Las mejores condiciones de surf en España en tiempo real. Alertas personalizadas y previsiones precisas de todos los spots españoles." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@lovable_dev" />
+    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/icon-192.png" />
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Register Service Worker -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
+  </body>
+</html>

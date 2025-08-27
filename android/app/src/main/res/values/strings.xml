@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">surf-espana-app</string>
+    <string name="title_activity_main">surf-espana-app</string>
+    <string name="package_name">app.lovable.e4433c2c5f99498fbf5f8d008b67475c</string>
+    <string name="custom_url_scheme">app.lovable.e4433c2c5f99498fbf5f8d008b67475c</string>
+</resources>
