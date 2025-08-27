@@ -35,16 +35,32 @@ export const fetchSurfConditions = async (spotId: string): Promise<SurfCondition
     
     const spot = surfSpots.find(s => s.id === spotId);
     if (!spot) {
+      console.error(`Spot no encontrado: ${spotId}`);
       throw new Error(`Spot with id ${spotId} not found`);
     }
 
     const params = 'waveHeight,wavePeriod,windSpeed,windDirection,airTemperature';
     const url = new URL(`${import.meta.env.VITE_API_URL}/weather/point`);
+    
+    // Log environment variables (sin mostrar la API key completa)
+    console.log('Environment:', {
+      apiUrl: import.meta.env.VITE_API_URL,
+      hasApiKey: !!import.meta.env.VITE_STORMGLASS_API_KEY,
+      spot: {
+        name: spot.name,
+        lat: spot.coordinates[1],
+        lng: spot.coordinates[0]
+      }
+    });
+
     url.searchParams.append('lat', spot.coordinates[1].toString());
     url.searchParams.append('lng', spot.coordinates[0].toString());
     url.searchParams.append('params', params);
 
-    console.log('Realizando petición a:', url.toString());
+    console.log('Request URL:', url.toString());
+    console.log('Request Headers:', {
+      Authorization: import.meta.env.VITE_STORMGLASS_API_KEY ? 'Present' : 'Missing'
+    });
 
     const response = await fetch(url, {
       headers: {
@@ -52,9 +68,16 @@ export const fetchSurfConditions = async (spotId: string): Promise<SurfCondition
       }
     });
 
+    console.log('Response status:', response.status);
+    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Stormglass API Error:', errorText);
+      console.error('API Error Details:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorText
+      });
       throw new Error(`API error ${response.status}: ${errorText}`);
     }
   
