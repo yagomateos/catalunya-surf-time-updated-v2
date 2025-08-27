@@ -31,6 +31,8 @@ export interface SurfConditions {
 
 export const fetchSurfConditions = async (spotId: string): Promise<SurfConditions> => {
   try {
+    console.log(`[${new Date().toISOString()}] Iniciando petición para spot ${spotId}`);
+    
     const spot = surfSpots.find(s => s.id === spotId);
     if (!spot) {
       throw new Error(`Spot with id ${spotId} not found`);
@@ -41,6 +43,8 @@ export const fetchSurfConditions = async (spotId: string): Promise<SurfCondition
     url.searchParams.append('lat', spot.coordinates[1].toString());
     url.searchParams.append('lng', spot.coordinates[0].toString());
     url.searchParams.append('params', params);
+
+    console.log('Realizando petición a:', url.toString());
 
     const response = await fetch(url, {
       headers: {
@@ -60,6 +64,14 @@ export const fetchSurfConditions = async (spotId: string): Promise<SurfCondition
     if (!currentConditions) {
       throw new Error('No current conditions data available');
     }
+
+    console.log('Datos recibidos:', {
+      spot: spot.name,
+      time: currentConditions.time,
+      waveHeight: currentConditions.waveHeight.sg,
+      windSpeed: currentConditions.windSpeed.sg,
+      temperature: currentConditions.airTemperature.sg
+    });
 
     const { waveHeight, windSpeed, windDirection, airTemperature } = currentConditions;
 
@@ -95,4 +107,4 @@ const calculateRating = (data: StormglassResponse['hours'][0]): SurfConditions['
   return 'fair';
 };
 
-export {}
+export default fetchSurfConditions;
