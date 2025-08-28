@@ -32,8 +32,8 @@ All colors MUST be HSL.
     --muted-foreground: 215 15% 50%;
 
     /* Coral accent for alerts/highlights */
-    --accent: 15 85% 65%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 200 85% 45%; /* Changed from 15 85% 65% (orange) to blue */
+    --accent-foreground: 215 25% 15%; /* Changed from 0 0% 100% */
 
     /* Deep sea for warnings */
     --destructive: 5 75% 55%;
@@ -99,8 +99,8 @@ All colors MUST be HSL.
     --muted: 215 15% 18%;
     --muted-foreground: 215 10% 65%;
 
-    --accent: 25 80% 60%;
-    --accent-foreground: 215 25% 8%;
+    --accent: 185 70% 55%; /* Changed from 25 80% 60% (orange) to blue */
+    --accent-foreground: 210 15% 90%; /* Changed from 215 25% 8% */
 
     --destructive: 5 70% 50%;
     --destructive-foreground: 210 15% 90%;

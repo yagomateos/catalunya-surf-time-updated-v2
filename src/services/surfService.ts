@@ -2,6 +2,9 @@ import { surfSpots, type SurfSpot } from '@/lib/spots';
 
 export interface SurfConditions {
   waveHeight: string;
+  swellWaveHeight: string;
+  swellWaveDirection: number;
+  swellWavePeriod: number;
   windSpeed: string;
   windDirection: number;
   rating: 'excellent' | 'good' | 'fair';
@@ -15,7 +18,7 @@ const formatWaveHeight = (height: number): string =>
 
 // Helper function to format wind speed
 const formatWindSpeed = (speed: number): string => 
-  `${(speed * 3.6).toFixed(1)} km/h`;
+  `${speed.toFixed(1)} km/h`;
 
 // Helper function to format temperature
 const formatTemperature = (temp: number): string => 
@@ -28,6 +31,23 @@ const calculateRating = (waveHeight: number, windSpeed: number): SurfConditions[
   return 'fair';
 };
 
+const fetchWindData = async (latitude: number, longitude: number) => {
+  const url = new URL('https://api.open-meteo.com/v1/forecast');
+  url.searchParams.append('latitude', latitude.toString());
+  url.searchParams.append('longitude', longitude.toString());
+  const hourlyParams = ['wind_speed_10m', 'wind_direction_10m'];
+  hourlyParams.forEach(param => url.searchParams.append('hourly', param));
+  url.searchParams.append('timezone', 'auto');
+  url.searchParams.append('forecast_days', '1');
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`API error (wind) ${response.status}: ${errorText}`);
+  }
+  return response.json();
+}
+
 export const fetchSurfConditions = async (spotId: string): Promise<SurfConditions> => {
   try {
     console.log(`[${new Date().toISOString()}] Iniciando petición para spot ${spotId} con Open-Meteo`);
@@ -39,49 +59,52 @@ export const fetchSurfConditions = async (spotId: string): Promise<SurfCondition
     }
 
     // Open-Meteo API endpoint for marine weather
-    const url = new URL('https://marine-api.open-meteo.com/v1/marine');
-    url.searchParams.append('latitude', spot.coordinates[1].toString());
-    url.searchParams.append('longitude', spot.coordinates[0].toString());
-    const hourlyParams = ['wave_height', 'sea_surface_temperature'];
-    hourlyParams.forEach(param => url.searchParams.append('hourly', param));
-    url.searchParams.append('timezone', 'auto');
-    url.searchParams.append('forecast_days', '1');
+    const marineUrl = new URL('https://marine-api.open-meteo.com/v1/marine');
+    marineUrl.searchParams.append('latitude', spot.coordinates[1].toString());
+    marineUrl.searchParams.append('longitude', spot.coordinates[0].toString());
+    const marineHourlyParams = ['wave_height', 'sea_surface_temperature', 'swell_wave_height', 'swell_wave_direction', 'swell_wave_period'];
+    marineHourlyParams.forEach(param => marineUrl.searchParams.append('hourly', param));
+    marineUrl.searchParams.append('timezone', 'auto');
+    marineUrl.searchParams.append('forecast_days', '1');
 
-    console.log('Request URL (Open-Meteo):', url.toString());
+    const [marineResponse, windData] = await Promise.all([
+      fetch(marineUrl),
+      fetchWindData(spot.coordinates[1], spot.coordinates[0])
+    ]);
 
-    const response = await fetch(url);
-
-    console.log('Response status (Open-Meteo):', response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('API Error Details (Open-Meteo):', {
-        status: response.status,
-        statusText: response.statusText,
-        error: errorText
-      });
-      throw new Error(`API error ${response.status}: ${errorText}`);
+    if (!marineResponse.ok) {
+      const errorText = await marineResponse.text();
+      throw new Error(`API error (marine) ${marineResponse.status}: ${errorText}`);
     }
   
-    const data = await response.json();
-    const currentHourIndex = data.hourly.time.findIndex((time: string) => new Date(time).getHours() === new Date().getHours());
+    const marineData = await marineResponse.json();
+    const currentHourIndex = marineData.hourly.time.findIndex((time: string) => new Date(time).getHours() === new Date().getHours());
 
     if (currentHourIndex === -1 ||
-        !data.hourly.wave_height || data.hourly.wave_height[currentHourIndex] === undefined ||
-        !data.hourly.sea_surface_temperature || data.hourly.sea_surface_temperature[currentHourIndex] === undefined
+        !marineData.hourly.wave_height || marineData.hourly.wave_height[currentHourIndex] === undefined ||
+        !marineData.hourly.sea_surface_temperature || marineData.hourly.sea_surface_temperature[currentHourIndex] === undefined ||
+        !marineData.hourly.swell_wave_height || marineData.hourly.swell_wave_height[currentHourIndex] === undefined ||
+        !marineData.hourly.swell_wave_direction || marineData.hourly.swell_wave_direction[currentHourIndex] === undefined ||
+        !marineData.hourly.swell_wave_period || marineData.hourly.swell_wave_period[currentHourIndex] === undefined ||
+        !windData.hourly.wind_speed_10m || windData.hourly.wind_speed_10m[currentHourIndex] === undefined ||
+        !windData.hourly.wind_direction_10m || windData.hourly.wind_direction_10m[currentHourIndex] === undefined
     ) {
       throw new Error('No current conditions data available for this hour from Open-Meteo');
     }
 
-    const waveHeight = data.hourly.wave_height[currentHourIndex];
-    const temperature = data.hourly.sea_surface_temperature[currentHourIndex];
-
-    // Placeholder values for wind, as we are not requesting them currently
-    const windSpeed = 0;
-    const windDirection = 0;
+    const waveHeight = marineData.hourly.wave_height[currentHourIndex];
+    const temperature = marineData.hourly.sea_surface_temperature[currentHourIndex];
+    const windSpeed = windData.hourly.wind_speed_10m[currentHourIndex];
+    const windDirection = windData.hourly.wind_direction_10m[currentHourIndex];
+    const swellWaveHeight = marineData.hourly.swell_wave_height[currentHourIndex];
+    const swellWaveDirection = marineData.hourly.swell_wave_direction[currentHourIndex];
+    const swellWavePeriod = marineData.hourly.swell_wave_period[currentHourIndex];
 
     return {
       waveHeight: formatWaveHeight(waveHeight),
+      swellWaveHeight: formatWaveHeight(swellWaveHeight),
+      swellWaveDirection: swellWaveDirection,
+      swellWavePeriod: swellWavePeriod,
       windSpeed: formatWindSpeed(windSpeed),
       windDirection: windDirection,
       temperature: formatTemperature(temperature),

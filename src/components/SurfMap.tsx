@@ -2,14 +2,12 @@ import React, { useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, RefreshCw } from "lucide-react";
+import { RefreshCw, Heart } from "lucide-react";
 import { useQueryClient } from '@tanstack/react-query';
 import { useSurfConditions } from '@/hooks/useSurfConditions';
-import type { SurfConditions } from '@/services/surfService';
 import { surfSpots, type SurfSpot } from '@/lib/spots';
-import { Skeleton } from "@/components/ui/skeleton";
+import { useFavorites } from '@/context/FavoritesContext';
 
 // Create simple custom icons for different ratings using CSS colors
 const createCustomIcon = (rating: 'excellent' | 'good' | 'fair') => {
@@ -38,39 +36,35 @@ const degreesToCardinal = (deg: number) => {
 
 const SurfMap = () => {
   const [selectedSpot, setSelectedSpot] = useState<SurfSpot | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
   const queryClient = useQueryClient();
-
-  const filteredSpots = surfSpots.filter(spot =>
-    spot.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    spot.region.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const { isFavorite, addFavorite, removeFavorite } = useFavorites();
 
   // Fetch surf conditions for the selected spot
   const { data: conditions, isLoading, isError, error } = useSurfConditions(selectedSpot?.id ?? '');
 
-  // Add refresh button
   const handleRefresh = () => {
     if (selectedSpot) {
-      queryClient.invalidateQueries(['surfConditions', selectedSpot.id]);
+      queryClient.invalidateQueries({ queryKey: ['surfConditions', selectedSpot.id] });
+    }
+  };
+
+  const handleFavoriteClick = (e: React.MouseEvent, spot: SurfSpot) => {
+    e.stopPropagation();
+    if (isFavorite(spot.id)) {
+      removeFavorite(spot.id);
+    } else {
+      addFavorite(spot.id);
+    }
+    (e.currentTarget as HTMLElement).blur();
+    // Re-render popup
+    const marker = (e.target as HTMLElement).closest('.leaflet-marker-icon');
+    if (marker) {
+      (marker as any).openPopup();
     }
   };
 
   return (
     <div className="relative h-screen bg-background">
-      {/* Search Bar */}
-      <div className="absolute top-4 left-4 right-4 z-10">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar playas..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 bg-card/90 backdrop-blur-sm"
-          />
-        </div>
-      </div>
-
       {/* Map Container */}
       <MapContainer
         center={[40.0, -4.0]}
@@ -94,9 +88,16 @@ const SurfMap = () => {
           >
             <Popup>
               <div className="min-w-[200px]">
-                <h3 className="font-semibold text-lg">{spot.name}</h3>
-                <p className="text-sm text-gray-600 mb-2">{spot.region}</p>
-                {conditions && (
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h3 className="font-semibold text-lg">{spot.name}</h3>
+                    <p className="text-sm text-gray-600">{spot.region}</p>
+                  </div>
+                  <Button variant="ghost" size="icon" onClick={(e) => handleFavoriteClick(e, spot)} className="h-8 w-8">
+                    <Heart className={`h-5 w-5 ${isFavorite(spot.id) ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
+                  </Button>
+                </div>
+                {conditions && selectedSpot?.id === spot.id && (
                   <div className="space-y-1 text-sm">
                     <div>Olas: {conditions.waveHeight}</div>
                     <div>Viento: {conditions.windSpeed} ({degreesToCardinal(conditions.windDirection)})</div>
@@ -106,12 +107,12 @@ const SurfMap = () => {
                     </div>
                   </div>
                 )}
-                {isLoading && (
+                {isLoading && selectedSpot?.id === spot.id && (
                   <div className="flex items-center justify-center py-2">
                     <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
                   </div>
                 )}
-                {isError && (
+                {isError && selectedSpot?.id === spot.id && (
                   <div className="text-destructive text-sm">
                     Error: {error?.message || 'Desconocido'}
                   </div>
@@ -141,92 +142,16 @@ const SurfMap = () => {
         </div>
       </div>
 
-      {/* Selected Spot Info */}
-      {selectedSpot && (
-        <div className="absolute bottom-20 right-4 bg-card/90 backdrop-blur-sm rounded-lg p-4 shadow-lg max-w-xs">
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="font-semibold">{selectedSpot.name}</h3>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => setSelectedSpot(null)}
-              className="p-1 h-6 w-6"
-            >
-              ×
-            </Button>
-          </div>
-          <p className="text-sm text-muted-foreground mb-2">{selectedSpot.region}</p>
-          {conditions && (
-            <>
-              <div className="space-y-1 text-sm">
-                <div>Olas: {conditions.waveHeight}</div>
-                <div>Viento: {conditions.windSpeed} ({degreesToCardinal(conditions.windDirection)})</div>
-                <div>Temperatura: {conditions.temperature}</div>
-                <div className="text-xs text-muted-foreground">
-                  Actualizado: {new Date(conditions.lastUpdate).toLocaleTimeString()}
-                </div>
-              </div>
-            </>
-          )}
-          {isLoading && (
-            <div className="flex items-center justify-center py-2">
-              <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
-            </div>
-          )}
-          {isError && (
-            <div className="text-destructive text-sm">
-              Error: {error?.message || 'Desconocido'}
-            </div>
-          )}
-        </div>
-      )}
-
       {/* Refresh Button */}
       <Button 
         variant="outline" 
         size="sm" 
         onClick={handleRefresh}
-        className="absolute top-4 right-4 z-10"
+        className="absolute top-4 right-4 z-10 hidden"
       >
         <RefreshCw className="h-4 w-4 mr-2" />
         Actualizar
       </Button>
-
-      {/* Search Results */}
-      {searchTerm && filteredSpots.length > 0 && (
-        <div className="absolute top-16 left-4 right-4 max-h-60 overflow-y-auto bg-card/90 backdrop-blur-sm rounded-lg shadow-lg z-10">
-          {filteredSpots.map((spot) => (
-            <div
-              key={spot.id}
-              className="p-3 border-b border-border/50 cursor-pointer hover:bg-accent/50"
-              onClick={() => {
-                setSearchTerm('');
-                setSelectedSpot(spot);
-              }}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <div className={`w-3 h-3 rounded-full border border-white ${
-                    spot.rating === 'excellent' 
-                      ? 'bg-blue-500'
-                      : spot.rating === 'good'
-                      ? 'bg-green-500'
-                      : 'bg-red-500'
-                  }`}></div>
-                  <div>
-                    <h4 className="font-medium">{spot.name}</h4>
-                    <p className="text-sm text-muted-foreground">{spot.region}</p>
-                  </div>
-                </div>
-                <div className="text-sm">
-                  {spot.windSpeed && <div>Viento: {spot.windSpeed}</div>}
-                  {spot.waveHeight && <div>Olas: {spot.waveHeight}</div>}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 };

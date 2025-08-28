@@ -1,12 +1,16 @@
+import { useState } from "react";
 import HourlyForecast from "@/components/HourlyForecast";
 import SurfAlerts from "@/components/SurfAlerts";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, MapPin } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { RefreshCw, MapPin, Search } from "lucide-react";
 import heroImage from "@/assets/hero-surf.jpg";
 import { surfSpots } from "@/lib/spots";
 import SurfConditionsWrapper from "@/components/SurfConditionsWrapper";
 
 const Index = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+
   const hourlyData = [
     { time: "12:00", waveHeight: "1.2m", windSpeed: "12km/h", rating: 'good' as const },
     { time: "13:00", waveHeight: "1.4m", windSpeed: "10km/h", rating: 'excellent' as const },
@@ -16,6 +20,12 @@ const Index = () => {
     { time: "17:00", waveHeight: "1.1m", windSpeed: "16km/h", rating: 'fair' as const },
     { time: "18:00", waveHeight: "0.9m", windSpeed: "18km/h", rating: 'fair' as const },
   ];
+
+  const filteredSpots = surfSpots.filter(
+    (spot) =>
+      spot.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      spot.region.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/30">
@@ -49,15 +59,20 @@ const Index = () => {
           {/* Current Conditions Header */}
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-semibold text-foreground">Condiciones Actuales</h2>
-            <Button variant="outline" size="sm" className="flex items-center space-x-2">
-              <RefreshCw className="h-4 w-4" />
-              <span>Actualizar</span>
-            </Button>
+            <div className="relative w-full max-w-xs">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar playa o región..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 bg-card/90 backdrop-blur-sm"
+              />
+            </div>
           </div>
 
           {/* Surf Spots Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {surfSpots.map((spot) => (
+            {filteredSpots.map((spot) => (
               <SurfConditionsWrapper key={spot.id} spot={spot} />
             ))}
           </div>
