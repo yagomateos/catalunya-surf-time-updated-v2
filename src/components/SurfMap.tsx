@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -9,6 +9,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useSurfConditions } from '@/hooks/useSurfConditions';
 import type { SurfConditions } from '@/services/surfService';
 import { surfSpots, type SurfSpot } from '@/lib/spots';
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Create simple custom icons for different ratings using CSS colors
 const createCustomIcon = (rating: 'excellent' | 'good' | 'fair') => {
@@ -30,6 +31,11 @@ const createCustomIcon = (rating: 'excellent' | 'good' | 'fair') => {
   });
 };
 
+const degreesToCardinal = (deg: number) => {
+  const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  return directions[Math.round(deg / 45) % 8];
+};
+
 const SurfMap = () => {
   const [selectedSpot, setSelectedSpot] = useState<SurfSpot | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,7 +47,7 @@ const SurfMap = () => {
   );
 
   // Fetch surf conditions for the selected spot
-  const { data: conditions, isLoading } = useSurfConditions(selectedSpot?.id ?? '');
+  const { data: conditions, isLoading, isError, error } = useSurfConditions(selectedSpot?.id ?? '');
 
   // Add refresh button
   const handleRefresh = () => {
@@ -90,24 +96,26 @@ const SurfMap = () => {
               <div className="min-w-[200px]">
                 <h3 className="font-semibold text-lg">{spot.name}</h3>
                 <p className="text-sm text-gray-600 mb-2">{spot.region}</p>
-                {spot.waveHeight && (
+                {conditions && (
                   <div className="space-y-1 text-sm">
-                    <div>Olas: {spot.waveHeight}</div>
-                    <div>Viento: {spot.windSpeed}</div>
+                    <div>Olas: {conditions.waveHeight}</div>
+                    <div>Viento: {conditions.windSpeed} ({degreesToCardinal(conditions.windDirection)})</div>
+                    <div>Temperatura: {conditions.temperature}</div>
+                    <div className="text-xs text-muted-foreground">
+                      Actualizado: {new Date(conditions.lastUpdate).toLocaleTimeString()}
+                    </div>
                   </div>
                 )}
-                <div className="mt-2">
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    spot.rating === 'excellent' 
-                      ? 'bg-blue-100 text-blue-800'
-                      : spot.rating === 'good'
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {spot.rating === 'excellent' ? 'Excelente' : 
-                     spot.rating === 'good' ? 'Bueno' : 'Regular'}
-                  </span>
-                </div>
+                {isLoading && (
+                  <div className="flex items-center justify-center py-2">
+                    <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
+                  </div>
+                )}
+                {isError && (
+                  <div className="text-destructive text-sm">
+                    Error: {error?.message || 'Desconocido'}
+                  </div>
+                )}
               </div>
             </Popup>
           </Marker>
@@ -152,17 +160,22 @@ const SurfMap = () => {
             <>
               <div className="space-y-1 text-sm">
                 <div>Olas: {conditions.waveHeight}</div>
-                <div>Viento: {conditions.windSpeed} ({conditions.windDirection})</div>
+                <div>Viento: {conditions.windSpeed} ({degreesToCardinal(conditions.windDirection)})</div>
                 <div>Temperatura: {conditions.temperature}</div>
-              </div>
-              <div className="mt-2 text-xs text-muted-foreground">
-                Actualizado: {new Date(conditions.lastUpdate).toLocaleTimeString()}
+                <div className="text-xs text-muted-foreground">
+                  Actualizado: {new Date(conditions.lastUpdate).toLocaleTimeString()}
+                </div>
               </div>
             </>
           )}
           {isLoading && (
             <div className="flex items-center justify-center py-2">
               <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
+            </div>
+          )}
+          {isError && (
+            <div className="text-destructive text-sm">
+              Error: {error?.message || 'Desconocido'}
             </div>
           )}
         </div>

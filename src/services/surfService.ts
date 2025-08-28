@@ -1,25 +1,5 @@
 import { surfSpots, type SurfSpot } from '@/lib/spots';
 
-// Vite env variables declaration
-interface ImportMetaEnv {
-  VITE_API_URL: string;
-  VITE_STORMGLASS_API_KEY: string;
-}
-
-interface ImportMeta {
-  env: ImportMetaEnv;
-}
-
-interface StormglassResponse {
-  hours: Array<{
-    time: string;
-    waveHeight: { sg: number };
-    windSpeed: { sg: number };
-    windDirection: { sg: number };
-    airTemperature: { sg: number };
-  }>;
-}
-
 export interface SurfConditions {
   waveHeight: string;
   windSpeed: string;
@@ -29,9 +9,28 @@ export interface SurfConditions {
   lastUpdate: Date;
 }
 
+// Helper function to format wave height
+const formatWaveHeight = (height: number): string => 
+  `${height.toFixed(1)}m`;
+
+// Helper function to format wind speed
+const formatWindSpeed = (speed: number): string => 
+  `${(speed * 3.6).toFixed(1)} km/h`;
+
+// Helper function to format temperature
+const formatTemperature = (temp: number): string => 
+  `${temp.toFixed(1)}°C`;
+
+// Helper function to calculate rating (simplified for Open-Meteo data)
+const calculateRating = (waveHeight: number, windSpeed: number): SurfConditions['rating'] => {
+  if (waveHeight > 1.5) return 'excellent';
+  if (waveHeight > 1.0) return 'good';
+  return 'fair';
+};
+
 export const fetchSurfConditions = async (spotId: string): Promise<SurfConditions> => {
   try {
-    console.log(`[${new Date().toISOString()}] Iniciando petición para spot ${spotId}`);
+    console.log(`[${new Date().toISOString()}] Iniciando petición para spot ${spotId} con Open-Meteo`);
     
     const spot = surfSpots.find(s => s.id === spotId);
     if (!spot) {
@@ -39,41 +38,24 @@ export const fetchSurfConditions = async (spotId: string): Promise<SurfCondition
       throw new Error(`Spot with id ${spotId} not found`);
     }
 
-    const params = 'waveHeight,wavePeriod,windSpeed,windDirection,airTemperature';
-    const url = new URL(`${import.meta.env.VITE_API_URL}/weather/point`);
-    
-    // Log environment variables (sin mostrar la API key completa)
-    console.log('Environment:', {
-      apiUrl: import.meta.env.VITE_API_URL,
-      hasApiKey: !!import.meta.env.VITE_STORMGLASS_API_KEY,
-      spot: {
-        name: spot.name,
-        lat: spot.coordinates[1],
-        lng: spot.coordinates[0]
-      }
-    });
+    // Open-Meteo API endpoint for marine weather
+    const url = new URL('https://marine-api.open-meteo.com/v1/marine');
+    url.searchParams.append('latitude', spot.coordinates[1].toString());
+    url.searchParams.append('longitude', spot.coordinates[0].toString());
+    const hourlyParams = ['wave_height', 'sea_surface_temperature'];
+    hourlyParams.forEach(param => url.searchParams.append('hourly', param));
+    url.searchParams.append('timezone', 'auto');
+    url.searchParams.append('forecast_days', '1');
 
-    url.searchParams.append('lat', spot.coordinates[1].toString());
-    url.searchParams.append('lng', spot.coordinates[0].toString());
-    url.searchParams.append('params', params);
+    console.log('Request URL (Open-Meteo):', url.toString());
 
-    console.log('Request URL:', url.toString());
-    console.log('Request Headers:', {
-      Authorization: import.meta.env.VITE_STORMGLASS_API_KEY ? 'Present' : 'Missing'
-    });
+    const response = await fetch(url);
 
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': import.meta.env.VITE_STORMGLASS_API_KEY
-      }
-    });
-
-    console.log('Response status:', response.status);
-    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+    console.log('Response status (Open-Meteo):', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('API Error Details:', {
+      console.error('API Error Details (Open-Meteo):', {
         status: response.status,
         statusText: response.statusText,
         error: errorText
@@ -81,53 +63,35 @@ export const fetchSurfConditions = async (spotId: string): Promise<SurfCondition
       throw new Error(`API error ${response.status}: ${errorText}`);
     }
   
-    const data = await response.json() as StormglassResponse;
-    const currentConditions = data.hours?.[0];
-    
-    if (!currentConditions) {
-      throw new Error('No current conditions data available');
+    const data = await response.json();
+    const currentHourIndex = data.hourly.time.findIndex((time: string) => new Date(time).getHours() === new Date().getHours());
+
+    if (currentHourIndex === -1 ||
+        !data.hourly.wave_height || data.hourly.wave_height[currentHourIndex] === undefined ||
+        !data.hourly.sea_surface_temperature || data.hourly.sea_surface_temperature[currentHourIndex] === undefined
+    ) {
+      throw new Error('No current conditions data available for this hour from Open-Meteo');
     }
 
-    console.log('Datos recibidos:', {
-      spot: spot.name,
-      time: currentConditions.time,
-      waveHeight: currentConditions.waveHeight.sg,
-      windSpeed: currentConditions.windSpeed.sg,
-      temperature: currentConditions.airTemperature.sg
-    });
+    const waveHeight = data.hourly.wave_height[currentHourIndex];
+    const temperature = data.hourly.sea_surface_temperature[currentHourIndex];
 
-    const { waveHeight, windSpeed, windDirection, airTemperature } = currentConditions;
+    // Placeholder values for wind, as we are not requesting them currently
+    const windSpeed = 0;
+    const windDirection = 0;
 
     return {
-      waveHeight: formatWaveHeight(waveHeight.sg),
-      windSpeed: formatWindSpeed(windSpeed.sg),
-      windDirection: windDirection.sg,
-      temperature: formatTemperature(airTemperature.sg),
-      rating: calculateRating(currentConditions),
+      waveHeight: formatWaveHeight(waveHeight),
+      windSpeed: formatWindSpeed(windSpeed),
+      windDirection: windDirection,
+      temperature: formatTemperature(temperature),
+      rating: calculateRating(waveHeight, windSpeed),
       lastUpdate: new Date()
     };
   } catch (error) {
-    console.error('Error fetching surf conditions:', error);
+    console.error('Error fetching surf conditions (Open-Meteo):', error);
     throw error instanceof Error ? error : new Error('Unknown error occurred');
   }
-};
-
-const formatWaveHeight = (height: number): string => 
-  `${height.toFixed(1)}m`;
-
-const formatWindSpeed = (speed: number): string => 
-  `${(speed * 3.6).toFixed(1)} km/h`;
-
-const formatTemperature = (temp: number): string => 
-  `${temp.toFixed(1)}°C`;
-
-const calculateRating = (data: StormglassResponse['hours'][0]): SurfConditions['rating'] => {
-  const waveHeight = data.waveHeight.sg;
-  const windSpeed = data.windSpeed.sg;
-
-  if (waveHeight > 1.5 && windSpeed < 5) return 'excellent';
-  if (waveHeight > 1.0 && windSpeed < 7) return 'good';
-  return 'fair';
 };
 
 export default fetchSurfConditions;
