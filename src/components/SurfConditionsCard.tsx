@@ -71,6 +71,7 @@ const SurfConditionsCard = ({
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click from triggering
+    e.preventDefault(); // Prevent default link behavior
     if (isFavorite(spotId)) {
       removeFavorite(spotId);
     } else {
