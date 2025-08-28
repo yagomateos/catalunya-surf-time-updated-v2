@@ -8,8 +8,10 @@ import MapPage from "./pages/MapPage";
 import FavoritesPage from "./pages/FavoritesPage";
 import AccountPage from "./pages/AccountPage";
 import NotFound from "./pages/NotFound";
+import SpotDetailPage from "./pages/SpotDetailPage";
 import InstallPrompt from "./components/InstallPrompt";
 import MobileNavigation from "./components/MobileNavigation";
+import { FavoritesProvider } from './context/FavoritesContext';
 
 const queryClient = new QueryClient();
 
@@ -23,6 +25,7 @@ const App = () => (
         <Route path="/mapa" element={<MapPage />} />
         <Route path="/favoritas" element={<FavoritesPage />} />
         <Route path="/cuenta" element={<AccountPage />} />
+        <Route path="/spot/:spotId" element={<SpotDetailPage />} />
         <Route path="/surf-espana" element={<Index />} />
         <Route path="/espana" element={<Index />} />
         <Route path="*" element={<NotFound />} />

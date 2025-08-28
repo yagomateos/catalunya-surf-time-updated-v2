@@ -8,6 +8,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useSurfConditions } from '@/hooks/useSurfConditions';
 import { surfSpots, type SurfSpot } from '@/lib/spots';
 import { useFavorites } from '@/context/FavoritesContext';
+import { Link } from 'react-router-dom';
 
 // Create simple custom icons for different ratings using CSS colors
 const createCustomIcon = (rating: 'excellent' | 'good' | 'fair') => {
@@ -117,6 +118,11 @@ const SurfMap = () => {
                     Error: {error?.message || 'Desconocido'}
                   </div>
                 )}
+                <div className="mt-4 text-right">
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to={`/spot/${spot.id}`}>Más Info</Link>
+                  </Button>
+                </div>
               </div>
             </Popup>
           </Marker>

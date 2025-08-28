@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Waves, Wind, Thermometer, Heart } from "lucide-react";
 import { useFavorites } from "@/context/FavoritesContext";
 import { Button } from "./ui/button";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 interface SurfConditionsCardProps {
   spotId: string;
@@ -32,6 +33,7 @@ const SurfConditionsCard = ({
   rating
 }: SurfConditionsCardProps) => {
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const getRatingColor = (rating: string) => {
     switch (rating) {
@@ -54,7 +56,7 @@ const SurfConditionsCard = ({
   };
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+    e.stopPropagation(); // Prevent card click from triggering
     if (isFavorite(spotId)) {
       removeFavorite(spotId);
     } else {
@@ -63,8 +65,15 @@ const SurfConditionsCard = ({
     (e.currentTarget as HTMLElement).blur();
   };
 
+  const handleCardClick = () => {
+    navigate(`/spot/${spotId}`); // Navigate to spot detail page
+  };
+
   return (
-    <Card className="p-6 shadow-wave hover:shadow-deep transition-wave bg-gradient-to-br from-card to-secondary/20">
+    <Card
+      className="p-6 shadow-wave hover:shadow-deep transition-wave bg-gradient-to-br from-card to-secondary/20 cursor-pointer"
+      onClick={handleCardClick} // Add onClick to the Card
+    >
       <div className="flex justify-between items-start mb-4">
         <h3 className="text-lg font-semibold text-foreground">{location}</h3>
         <div className="flex items-center space-x-2">
