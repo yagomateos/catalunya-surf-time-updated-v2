@@ -142,17 +142,6 @@ const SpotDetailPage = () => {
             </Card>
           </div>
         )}
-
-        {/* Placeholder for Diagrams/Charts */}
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle className="text-xl">Diagramas y Previsiones</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">Aquí se mostrarán diagramas de oleaje, viento y mareas (próximamente).</p>
-            {/* Chart components will go here */}
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

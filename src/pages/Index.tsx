@@ -79,10 +79,10 @@ const Index = () => {
 
           {/* Hourly Forecast and Alerts */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-3">
               <HourlyForecast data={hourlyData} />
             </div>
-            <div>
+            <div className="lg:col-span-3 mb-4"> {/* Added mb-4 */}
               <SurfAlerts />
             </div>
           </div>

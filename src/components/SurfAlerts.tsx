@@ -286,7 +286,7 @@ const SurfAlerts = () => {
       </div>
 
       {!alertsEnabled && (
-        <div className="mt-6 p-4 bg-gradient-to-r from-muted/80 to-muted/60 rounded-xl text-center border border-border/50">
+        <div className="mt-6 mb-8 p-4 bg-gradient-to-r from-muted/80 to-muted/60 rounded-xl text-center border border-border/50">
           <div className="flex items-center justify-center space-x-2 mb-2">
             <Bell className="h-4 w-4 text-muted-foreground" />
             <p className="text-sm font-medium text-muted-foreground">

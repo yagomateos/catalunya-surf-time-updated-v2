@@ -78,6 +78,8 @@ const SurfConditionsWrapper = ({ spot }: SurfConditionsWrapperProps) => {
         windSpeed="--"
         windDirection=""
         temperature="--"
+        sunrise="--"
+        sunset="--"
         rating="poor"
       />
     );
@@ -95,6 +97,8 @@ const SurfConditionsWrapper = ({ spot }: SurfConditionsWrapperProps) => {
       windSpeed={conditions?.windSpeed || "--"}
       windDirection={conditions?.windDirection ? degreesToCardinal(conditions.windDirection) : ""}
       temperature={conditions?.temperature || "--"}
+      sunrise={conditions?.sunrise || "--"}
+      sunset={conditions?.sunset || "--"}
       rating={conditions?.rating || spot.rating}
     />
   );

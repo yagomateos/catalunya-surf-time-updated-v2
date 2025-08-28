@@ -11,7 +11,7 @@ const InstallPrompt = () => {
   if (!isInstallable || isInstalled || !isVisible) return null;
 
   return (
-    <Card className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm p-4 shadow-deep bg-gradient-wave border-primary/20 z-50">
+    <Card className="fixed top-4 right-4 md:max-w-sm p-4 shadow-deep bg-gradient-wave border-primary/20 z-50 hidden md:block"> {/* Changed positioning and added responsive class */}
       <div className="flex items-start space-x-3">
         <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
           <Smartphone className="h-5 w-5 text-primary" />

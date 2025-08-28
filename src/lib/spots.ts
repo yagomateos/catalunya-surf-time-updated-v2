@@ -36,8 +36,8 @@ export const surfSpots: SurfSpot[] = [
   { id: '23', name: 'Roses', coordinates: [3.1761, 42.2619], rating: 'excellent', region: 'Cataluña' },
 
   // Canarias
-  { id: '31', name: 'Las Canteras, Gran Canaria', coordinates: [-15.4500, 28.1500], rating: 'good', region: 'Gran Canaria' },
-  { id: '32', name: 'El Confital, Gran Canaria', coordinates: [-15.4333, 28.1667], rating: 'excellent', region: 'Gran Canaria' },
+  { id: '31', name: 'Las Canteras', coordinates: [-15.4500, 28.1500], rating: 'good', region: 'Gran Canaria' },
+  { id: '32', name: 'El Confital', coordinates: [-15.4333, 28.1667], rating: 'excellent', region: 'Gran Canaria' },
   { id: '33', name: 'Famara, Lanzarote', coordinates: [-13.5415, 29.1221], rating: 'excellent', region: 'Lanzarote' },
-  { id: '34', name: 'Playa de las Américas, Tenerife', coordinates: [-16.7250, 28.0583], rating: 'good', region: 'Tenerife' },
+  { id: '34', name: 'Las Américas', coordinates: [-16.7250, 28.0583], rating: 'good', region: 'Tenerife' },
 ];
