@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Waves, Wind, Thermometer, MapPin, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import SurfChart from '@/components/SurfChart'; // Import SurfChart
 
 const degreesToCardinal = (deg: number) => {
   const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
@@ -141,6 +142,17 @@ const SpotDetailPage = () => {
               </CardContent>
             </Card>
           </div>
+        )}
+
+        {conditions?.hourlyForecast && conditions.hourlyForecast.length > 0 && (
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle className="text-xl">Previsión Horaria</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SurfChart data={conditions.hourlyForecast} />
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>

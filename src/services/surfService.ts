@@ -1,5 +1,15 @@
 import { surfSpots, type SurfSpot } from '@/lib/spots';
 
+export interface HourlyForecastData {
+  time: string;
+  waveHeight: number;
+  windSpeed: number;
+  windDirection: number;
+  swellWaveHeight: number;
+  swellWaveDirection: number;
+  swellWavePeriod: number;
+}
+
 export interface SurfConditions {
   waveHeight: string;
   swellWaveHeight: string;
@@ -12,6 +22,7 @@ export interface SurfConditions {
   sunrise: string; // New
   sunset: string; // New
   lastUpdate: Date;
+  hourlyForecast: HourlyForecastData[]; // New field for hourly forecast
 }
 
 // Helper function to format wave height
@@ -39,10 +50,10 @@ const fetchWindData = async (latitude: number, longitude: number) => {
   url.searchParams.append('longitude', longitude.toString());
   const hourlyParams = ['wind_speed_10m', 'wind_direction_10m'];
   hourlyParams.forEach(param => url.searchParams.append('hourly', param));
-  const dailyParams = ['sunrise', 'sunset']; // Added daily params
+  const dailyParams = ['sunrise', 'sunset'];
   dailyParams.forEach(param => url.searchParams.append('daily', param));
   url.searchParams.append('timezone', 'auto');
-  url.searchParams.append('forecast_days', '1');
+  url.searchParams.append('forecast_days', '3'); // Fetch 3 days of data
 
   const response = await fetch(url);
   if (!response.ok) {
@@ -69,7 +80,7 @@ export const fetchSurfConditions = async (spotId: string): Promise<SurfCondition
     const marineHourlyParams = ['wave_height', 'sea_surface_temperature', 'swell_wave_height', 'swell_wave_direction', 'swell_wave_period'];
     marineHourlyParams.forEach(param => marineUrl.searchParams.append('hourly', param));
     marineUrl.searchParams.append('timezone', 'auto');
-    marineUrl.searchParams.append('forecast_days', '1');
+    marineUrl.searchParams.append('forecast_days', '3'); // Fetch 3 days of data
 
     const [marineResponse, weatherData] = await Promise.all([
       fetch(marineUrl),
@@ -83,6 +94,17 @@ export const fetchSurfConditions = async (spotId: string): Promise<SurfCondition
   
     const marineData = await marineResponse.json();
     const currentHourIndex = marineData.hourly.time.findIndex((time: string) => new Date(time).getHours() === new Date().getHours());
+
+    // Prepare hourly forecast data
+    const hourlyForecast: HourlyForecastData[] = marineData.hourly.time.map((time: string, index: number) => ({
+      time: new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      waveHeight: marineData.hourly.wave_height[index],
+      windSpeed: weatherData.hourly.wind_speed_10m[index],
+      windDirection: weatherData.hourly.wind_direction_10m[index],
+      swellWaveHeight: marineData.hourly.swell_wave_height[index],
+      swellWaveDirection: marineData.hourly.swell_wave_direction[index],
+      swellWavePeriod: marineData.hourly.swell_wave_period[index],
+    }));
 
     if (currentHourIndex === -1 ||
         !marineData.hourly.wave_height || marineData.hourly.wave_height[currentHourIndex] === undefined ||
@@ -119,7 +141,8 @@ export const fetchSurfConditions = async (spotId: string): Promise<SurfCondition
       sunrise: new Date(sunrise).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       sunset: new Date(sunset).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       rating: calculateRating(waveHeight, windSpeed),
-      lastUpdate: new Date()
+      lastUpdate: new Date(),
+      hourlyForecast: hourlyForecast,
     };
   } catch (error) {
     console.error('Error fetching surf conditions (Open-Meteo):', error);
