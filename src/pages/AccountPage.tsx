@@ -4,26 +4,70 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { User, Bell, Map, Heart, Settings, Info, LogOut, Smartphone } from "lucide-react";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { User as UserIcon, Bell, Map, Heart, Settings, Info, LogOut, Smartphone } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { auth } from "@/firebase";
+import { onAuthStateChanged, updateProfile, signOut, User } from "firebase/auth";
+import { toast } from "@/components/ui/use-toast";
 
 const AccountPage = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [displayName, setDisplayName] = useState("");
   const [notifications, setNotifications] = useState(true);
   const [location, setLocation] = useState(true);
-  const [name, setName] = useState("Surfista Anónimo");
-  const [email, setEmail] = useState("surfer@ejemplo.com");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+        setDisplayName(currentUser.displayName || "");
+      } else {
+        navigate("/"); // Redirect to home if not logged in
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [navigate]);
+
+  const handleSaveProfile = async () => {
+    if (user && displayName.trim() !== user.displayName) {
+      try {
+        await updateProfile(user, { displayName: displayName.trim() });
+        toast({ title: "Éxito", description: "Tu nombre ha sido actualizado." });
+      } catch (error: any) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      }
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      toast({ title: "Sesión Cerrada" });
+      navigate("/");
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  };
+
+  if (loading || !user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/30 flex items-center justify-center">
+        <p>Cargando cuenta...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/30 pb-20">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            Mi Cuenta
-          </h1>
-          <p className="text-muted-foreground">
-            Gestiona tu perfil y configuración
-          </p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Mi Cuenta</h1>
+          <p className="text-muted-foreground">Gestiona tu perfil y configuración</p>
         </div>
 
         <div className="space-y-6">
@@ -31,7 +75,7 @@ const AccountPage = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <User className="h-5 w-5" />
+                <UserIcon className="h-5 w-5" />
                 <span>Perfil</span>
               </CardTitle>
             </CardHeader>
@@ -40,8 +84,8 @@ const AccountPage = () => {
                 <Label htmlFor="name">Nombre</Label>
                 <Input
                   id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="Tu nombre"
                 />
               </div>
@@ -50,12 +94,12 @@ const AccountPage = () => {
                 <Input
                   id="email"
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="tu@email.com"
+                  value={user.email || ""}
+                  readOnly
+                  className="bg-muted cursor-not-allowed"
                 />
               </div>
-              <Button className="w-full">Guardar Cambios</Button>
+              <Button className="w-full" onClick={handleSaveProfile}>Guardar Cambios</Button>
             </CardContent>
           </Card>
 
@@ -71,26 +115,16 @@ const AccountPage = () => {
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <div className="text-base font-medium">Alertas de Surf</div>
-                  <div className="text-sm text-muted-foreground">
-                    Recibe notificaciones cuando mejoren las condiciones
-                  </div>
+                  <div className="text-sm text-muted-foreground">Recibe notificaciones cuando mejoren las condiciones</div>
                 </div>
-                <Switch
-                  checked={notifications}
-                  onCheckedChange={setNotifications}
-                />
+                <Switch checked={notifications} onCheckedChange={setNotifications} />
               </div>
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <div className="text-base font-medium">Ubicación</div>
-                  <div className="text-sm text-muted-foreground">
-                    Permitir acceso a ubicación para mejores recomendaciones
-                  </div>
+                  <div className="text-sm text-muted-foreground">Permitir acceso a ubicación para mejores recomendaciones</div>
                 </div>
-                <Switch
-                  checked={location}
-                  onCheckedChange={setLocation}
-                />
+                <Switch checked={location} onCheckedChange={setLocation} />
               </div>
             </CardContent>
           </Card>
@@ -164,16 +198,14 @@ const AccountPage = () => {
                 Ayuda y Soporte
               </Button>
               <Separator />
-              <div className="text-center text-sm text-muted-foreground">
-                Surf España v1.0.0
-              </div>
+              <div className="text-center text-sm text-muted-foreground">Surf España v1.0.0</div>
             </CardContent>
           </Card>
 
           {/* Logout */}
           <Card className="border-destructive/20">
             <CardContent className="pt-6">
-              <Button variant="destructive" className="w-full">
+              <Button variant="destructive" className="w-full" onClick={handleLogout}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Cerrar Sesión
               </Button>
