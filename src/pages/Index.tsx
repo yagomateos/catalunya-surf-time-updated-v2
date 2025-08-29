@@ -76,7 +76,7 @@ const AuthSection = ({
           Mi Cuenta
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="w-[90vw] max-w-[425px] rounded-lg">
         <DialogHeader className="mb-4">
           <DialogTitle>Acceso de Usuario</DialogTitle>
           <DialogDescription>

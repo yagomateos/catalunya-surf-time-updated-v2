@@ -63,7 +63,7 @@ const AccountPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/30 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/30 pb-20 pt-12 sm:pt-8">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Mi Cuenta</h1>
@@ -189,16 +189,22 @@ const AccountPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button variant="ghost" className="w-full justify-start">
-                <Info className="h-4 w-4 mr-2" />
-                Sobre Surf España
+              <Button variant="ghost" className="w-full justify-start" asChild>
+                <Link to="/about-surf">
+                  <Info className="h-4 w-4 mr-2" />
+                  Sobre la Aplicación
+                </Link>
               </Button>
-              <Button variant="ghost" className="w-full justify-start">
-                <Settings className="h-4 w-4 mr-2" />
-                Ayuda y Soporte
+              <Button variant="ghost" className="w-full justify-start" asChild>
+                <a href="mailto:yago@sinaptiks.com">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Ayuda y Soporte
+                </a>
               </Button>
               <Separator />
-              <div className="text-center text-sm text-muted-foreground">Surf España v1.0.0</div>
+              <div className="text-center text-sm text-muted-foreground">
+                Surf España v1.0.0
+              </div>
             </CardContent>
           </Card>
 
