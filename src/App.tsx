@@ -19,24 +19,26 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <ScrollToTop />
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/mapa" element={<MapPage />} />
-        <Route path="/favoritas" element={<FavoritesPage />} />
-        <Route path="/cuenta" element={<AccountPage />} />
-        <Route path="/about-surf" element={<AboutSurfPage />} />
-        <Route path="/spot/:spotId" element={<SpotDetailPage />} />
-        <Route path="/surf-espana" element={<Index />} />
-        <Route path="/espana" element={<Index />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <MobileNavigation />
-      <InstallPrompt />
-    </TooltipProvider>
+    <FavoritesProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <ScrollToTop />
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/mapa" element={<MapPage />} />
+          <Route path="/favoritas" element={<FavoritesPage />} />
+          <Route path="/cuenta" element={<AccountPage />} />
+          <Route path="/about-surf" element={<AboutSurfPage />} />
+          <Route path="/spot/:spotId" element={<SpotDetailPage />} />
+          <Route path="/surf-espana" element={<Index />} />
+          <Route path="/espana" element={<Index />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <MobileNavigation />
+        <InstallPrompt />
+      </TooltipProvider>
+    </FavoritesProvider>
   </QueryClientProvider>
 );
 

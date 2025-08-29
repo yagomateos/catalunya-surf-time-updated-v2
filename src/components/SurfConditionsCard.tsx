@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Waves, Wind, Thermometer, Heart, Sunrise, Sunset } from "lucide-react";
 import { useFavorites } from "@/context/FavoritesContext";
 import { Button } from "./ui/button";
-import { Link } from "react-router-dom"; // Re-add Link
+import { Link } from "react-router-dom";
 
 interface SurfConditionsCardProps {
   spotId: string;
@@ -36,7 +36,7 @@ const SurfConditionsCard = ({
   sunset,
   rating
 }: SurfConditionsCardProps) => {
-  const { isFavorite, addFavorite, removeFavorite } = useFavorites();
+  const { isFavorite, addFavorite, removeFavorite, user } = useFavorites();
 
   const getRatingColor = (rating: string) => {
     switch (rating) {
@@ -70,8 +70,9 @@ const SurfConditionsCard = ({
   };
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click from triggering
-    e.preventDefault(); // Prevent default link behavior
+    e.stopPropagation();
+    e.preventDefault();
+    if (!user) return;
     if (isFavorite(spotId)) {
       removeFavorite(spotId);
     } else {
@@ -81,7 +82,7 @@ const SurfConditionsCard = ({
   };
 
   return (
-    <Link to={`/spot/${spotId}`} className="block"> {/* Re-add Link wrapper */}
+    <Link to={`/spot/${spotId}`} className="block">
       <Card className="p-6 shadow-wave hover:shadow-deep transition-wave bg-gradient-to-br from-card to-secondary/20">
         <div className="flex justify-between items-start mb-4">
           <h3 className="text-lg font-semibold text-foreground">{location}</h3>
@@ -89,9 +90,11 @@ const SurfConditionsCard = ({
             <Badge className={`${getRatingColor(rating)} px-3 py-1 font-medium`}>
               {getRatingText(rating)}
             </Badge>
-            <Button variant="ghost" size="icon" onClick={handleFavoriteClick} className="h-8 w-8">
-              <Heart className={`h-5 w-5 ${isFavorite(spotId) ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
-            </Button>
+            {user && (
+              <Button variant="ghost" size="icon" onClick={handleFavoriteClick} className="h-8 w-8">
+                <Heart className={`h-5 w-5 ${isFavorite(spotId) ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
+              </Button>
+            )}
           </div>
         </div>
         

@@ -1,12 +1,16 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-const FAVORITES_KEY = 'surf-app-favorites';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { auth, db } from '@/firebase';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { toast } from '@/components/ui/use-toast';
 
 interface FavoritesContextType {
   favorites: string[];
   addFavorite: (spotId: string) => void;
   removeFavorite: (spotId: string) => void;
   isFavorite: (spotId: string) => boolean;
+  loading: boolean;
+  user: User | null;
 }
 
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
@@ -25,46 +29,85 @@ interface FavoritesProviderProps {
 
 export const FavoritesProvider = ({ children }: FavoritesProviderProps) => {
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const storedFavorites = localStorage.getItem(FAVORITES_KEY);
-      if (storedFavorites) {
-        setFavorites(JSON.parse(storedFavorites));
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setLoading(true);
+      setUser(currentUser);
+
+      if (currentUser) {
+        const userFavoritesRef = doc(db, 'favorites', currentUser.uid);
+        try {
+          const docSnap = await getDoc(userFavoritesRef);
+          const firestoreFavorites = docSnap.exists() ? docSnap.data().spotIds : [];
+          setFavorites(firestoreFavorites);
+        } catch (error) {
+          console.error("Error fetching Firestore favorites:", error);
+          toast({ title: "Error al cargar favoritos", description: (error as Error).message, variant: "destructive" });
+          setFavorites([]);
+        }
+      } else {
+        setFavorites([]);
       }
-    } catch (error) {
-      console.error('Error reading favorites from localStorage', error);
-    }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const saveFavorites = (newFavorites: string[]) => {
+  const addFavorite = useCallback(async (spotId: string) => {
+    if (!user || favorites.includes(spotId)) return;
+
+    const oldFavorites = [...favorites];
+    const newFavorites = [...favorites, spotId];
+    setFavorites(newFavorites); // Optimistic update
+
     try {
-      setFavorites(newFavorites);
-      localStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
+      await setDoc(doc(db, 'favorites', user.uid), { spotIds: newFavorites });
     } catch (error) {
-      console.error('Error saving favorites to localStorage', error);
+      console.error("Failed to add favorite to Firestore:", error);
+      toast({ 
+        title: "Error al guardar favorito", 
+        description: "No se pudo guardar el cambio. Revisa tus reglas de seguridad de Firestore.", 
+        variant: "destructive" 
+      });
+      setFavorites(oldFavorites); // Revert UI on error
     }
-  };
+  }, [user, favorites, db]);
 
-  const addFavorite = (spotId: string) => {
-    if (!favorites.includes(spotId)) {
-      saveFavorites([...favorites, spotId]);
+  const removeFavorite = useCallback(async (spotId: string) => {
+    if (!user) return;
+
+    const oldFavorites = [...favorites];
+    const newFavorites = favorites.filter((id) => id !== spotId);
+    setFavorites(newFavorites); // Optimistic update
+
+    try {
+      await setDoc(doc(db, 'favorites', user.uid), { spotIds: newFavorites });
+    } catch (error) {
+      console.error("Failed to remove favorite from Firestore:", error);
+      toast({ 
+        title: "Error al guardar favorito", 
+        description: "No se pudo guardar el cambio. Revisa tus reglas de seguridad de Firestore.", 
+        variant: "destructive" 
+      });
+      setFavorites(oldFavorites); // Revert UI on error
     }
-  };
+  }, [user, favorites, db]);
 
-  const removeFavorite = (spotId: string) => {
-    saveFavorites(favorites.filter((id) => id !== spotId));
-  };
-
-  const isFavorite = (spotId: string) => {
+  const isFavorite = useCallback((spotId: string) => {
     return favorites.includes(spotId);
-  };
+  }, [favorites]);
 
   const value = {
     favorites,
     addFavorite,
     removeFavorite,
     isFavorite,
+    loading,
+    user,
   };
 
   return (
