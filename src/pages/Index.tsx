@@ -256,7 +256,7 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-primary-dark/80 to-primary/60" />
         <div className="relative z-10 container mx-auto px-4 h-full flex items-center justify-between">
           <div className="text-white">
-            <h1 className="text-4xl md:text-5xl font-bold mb-2">
+            <h1 className="text-4xl md:text-5xl font-bold mt-6 mb-2">
               Surf España
             </h1>
             <p className="text-xl opacity-90 mb-4">
