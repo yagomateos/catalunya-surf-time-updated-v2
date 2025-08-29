@@ -5,49 +5,14 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { User, Bell, Map, Heart, Settings, Info, LogOut, Smartphone } from "lucide-react";
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const AccountPage = () => {
-  const navigate = useNavigate();
-  const [notifications, setNotifications] = useState(false);
-  const [location, setLocation] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-
-  useEffect(() => {
-    // Load settings from localStorage on component mount
-    const savedName = localStorage.getItem('user-name');
-    const savedEmail = localStorage.getItem('user-email');
-    const savedNotifications = localStorage.getItem('notifications-enabled');
-    const savedLocation = localStorage.getItem('location-enabled');
-
-    if (savedName) setName(savedName);
-    if (savedEmail) setEmail(savedEmail);
-    if (savedNotifications) setNotifications(JSON.parse(savedNotifications));
-    if (savedLocation) setLocation(JSON.parse(savedLocation));
-  }, []);
-
-  const handleSaveChanges = () => {
-    localStorage.setItem('user-name', name);
-    localStorage.setItem('user-email', email);
-    localStorage.setItem('notifications-enabled', JSON.stringify(notifications));
-    localStorage.setItem('location-enabled', JSON.stringify(location));
-    // Optionally, provide user feedback (e.g., a toast notification)
-    alert("Cambios guardados!"); // Simple alert for now
-  };
-
-  const handleLogout = () => {
-    // Clear relevant localStorage items
-    localStorage.removeItem('user-name');
-    localStorage.removeItem('user-email');
-    localStorage.removeItem('notifications-enabled');
-    localStorage.removeItem('location-enabled');
-    localStorage.removeItem('surf-app-favorites'); // Clear favorites on logout
-    
-    // Redirect to home page
-    navigate('/');
-  };
+  const [notifications, setNotifications] = useState(true);
+  const [location, setLocation] = useState(true);
+  const [name, setName] = useState("Surfista Anónimo");
+  const [email, setEmail] = useState("surfer@ejemplo.com");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/30 pb-20">
@@ -90,7 +55,7 @@ const AccountPage = () => {
                   placeholder="tu@email.com"
                 />
               </div>
-              <Button className="w-full" onClick={handleSaveChanges}>Guardar Cambios</Button>
+              <Button className="w-full">Guardar Cambios</Button>
             </CardContent>
           </Card>
 
@@ -190,6 +155,15 @@ const AccountPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
+              <Button variant="ghost" className="w-full justify-start">
+                <Info className="h-4 w-4 mr-2" />
+                Sobre Surf España
+              </Button>
+              <Button variant="ghost" className="w-full justify-start">
+                <Settings className="h-4 w-4 mr-2" />
+                Ayuda y Soporte
+              </Button>
+              <Separator />
               <div className="text-center text-sm text-muted-foreground">
                 Surf España v1.0.0
               </div>
@@ -199,7 +173,7 @@ const AccountPage = () => {
           {/* Logout */}
           <Card className="border-destructive/20">
             <CardContent className="pt-6">
-              <Button variant="destructive" className="w-full" onClick={handleLogout}>
+              <Button variant="destructive" className="w-full">
                 <LogOut className="h-4 w-4 mr-2" />
                 Cerrar Sesión
               </Button>
