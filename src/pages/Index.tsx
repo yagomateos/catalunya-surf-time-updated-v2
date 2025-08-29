@@ -30,7 +30,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/30">
       {/* Hero Section */}
-      <div className="relative h-64 bg-gradient-deep overflow-hidden">
+      <div className="relative h-64 bg-gradient-deep overflow-hidden"> {/* Reverted fixed, top-0, left-0, w-full, z-20 */}
         <img 
           src={heroImage} 
           alt="Surfing conditions in Cataluña" 
@@ -54,12 +54,12 @@ const Index = () => {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8"> {/* Reverted pt-64 */}
         <div className="grid gap-6">
           {/* Current Conditions Header */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-4"> {/* Added flex-col, md:flex-row, gap */}
-            <h2 className="text-2xl font-semibold text-foreground">Condiciones Actuales</h2>
-            <div className="relative w-full md:max-w-xs"> {/* Removed w-full, added md:max-w-xs */}
+            <h2 className="text-2xl font-semibold text-foreground whitespace-nowrap flex-shrink-0">Condiciones Actuales</h2> {/* Added whitespace-nowrap flex-shrink-0 */}
+            <div className="relative w-full md:max-w-xs flex-grow"> {/* Added flex-grow */}
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Buscar playa o región..."

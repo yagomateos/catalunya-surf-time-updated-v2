@@ -12,6 +12,7 @@ import SpotDetailPage from "./pages/SpotDetailPage";
 import InstallPrompt from "./components/InstallPrompt";
 import MobileNavigation from "./components/MobileNavigation";
 import { FavoritesProvider } from './context/FavoritesContext';
+import ScrollToTop from './components/ScrollToTop';
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/mapa" element={<MapPage />} />
