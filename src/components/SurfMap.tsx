@@ -38,7 +38,7 @@ const degreesToCardinal = (deg: number) => {
 const SurfMap = () => {
   const [selectedSpot, setSelectedSpot] = useState<SurfSpot | null>(null);
   const queryClient = useQueryClient();
-  const { isFavorite, addFavorite, removeFavorite } = useFavorites();
+  const { isFavorite, addFavorite, removeFavorite, user } = useFavorites(); // Get user from context
 
   // Fetch surf conditions for the selected spot
   const { data: conditions, isLoading, isError, error } = useSurfConditions(selectedSpot?.id ?? '');
@@ -51,6 +51,8 @@ const SurfMap = () => {
 
   const handleFavoriteClick = (e: React.MouseEvent, spot: SurfSpot) => {
     e.stopPropagation();
+    e.preventDefault();
+    if (!user) return; // Guard clause, though button will be hidden/disabled
     if (isFavorite(spot.id)) {
       removeFavorite(spot.id);
     } else {
@@ -94,9 +96,16 @@ const SurfMap = () => {
                     <h3 className="font-semibold text-lg">{spot.name}</h3>
                     <p className="text-sm text-gray-600">{spot.region}</p>
                   </div>
-                  <Button variant="ghost" size="icon" onClick={(e) => handleFavoriteClick(e, spot)} className="h-8 w-8">
-                    <Heart className={`h-5 w-5 ${isFavorite(spot.id) ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
-                  </Button>
+                  {user && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => handleFavoriteClick(e, spot)}
+                      className="h-8 w-8"
+                    >
+                      <Heart className={`h-5 w-5 ${isFavorite(spot.id) ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
+                    </Button>
+                  )}
                 </div>
                 {conditions && selectedSpot?.id === spot.id && (
                   <div className="space-y-1 text-sm">
