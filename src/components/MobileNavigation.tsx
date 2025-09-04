@@ -1,4 +1,4 @@
-import { Home, Map, Heart, User } from "lucide-react";
+import { Home, Map, Heart, User, Video } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -8,6 +8,7 @@ const MobileNavigation = () => {
   const navItems = [
     { path: "/", label: "Inicio", icon: Home },
     { path: "/mapa", label: "Mapa", icon: Map },
+    { path: "/cams", label: "Cams", icon: Video },
     { path: "/favoritas", label: "Favoritas", icon: Heart },
     { path: "/cuenta", label: "Cuenta", icon: User },
   ];

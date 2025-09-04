@@ -10,6 +10,7 @@ import AccountPage from "./pages/AccountPage";
 import NotFound from "./pages/NotFound";
 import SpotDetailPage from "./pages/SpotDetailPage";
 import AboutSurfPage from "./pages/AboutSurfPage";
+import CamsPage from "./pages/CamsPage";
 import InstallPrompt from "./components/InstallPrompt";
 import MobileNavigation from "./components/MobileNavigation";
 import { FavoritesProvider } from './context/FavoritesContext';
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/cuenta" element={<AccountPage />} />
           <Route path="/about-surf" element={<AboutSurfPage />} />
           <Route path="/spot/:spotId" element={<SpotDetailPage />} />
+          <Route path="/cams" element={<CamsPage />} />
           <Route path="/surf-espana" element={<Index />} />
           <Route path="/espana" element={<Index />} />
           <Route path="*" element={<NotFound />} />

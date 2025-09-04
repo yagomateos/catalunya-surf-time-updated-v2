@@ -7,6 +7,13 @@ export default defineConfig({
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      "/api-windy": {
+        target: "https://api.windy.com",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-windy/, ""),
+      },
+    },
   },
   plugins: [
     react(),
