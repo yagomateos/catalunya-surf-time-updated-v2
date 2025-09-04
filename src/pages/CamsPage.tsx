@@ -52,6 +52,15 @@ const STATIC_WEBCAMS: Webcam[] = [
     region: "northAmerica", // Corregido a northAmerica
     location: { city: "Deal" },
   },
+  {
+    id: "2",
+    name: "Scarborough Beach, England",
+    embedUrl: "https://www.youtube.com/embed/AOl6WhaQJJI?si=oYrLGr3bg0Zy4ZWA",
+    type: "iframe",
+    region: "europe", // Corregido a northAmerica
+    location: { city: "Scarborough" },
+  },
+  
 ];
 
 const CamsPage = () => {
