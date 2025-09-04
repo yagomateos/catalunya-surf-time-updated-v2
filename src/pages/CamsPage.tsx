@@ -121,7 +121,7 @@ const CamsPage = () => {
 
       {viewMode === "cams" && (
         <> 
-          <div className="mb-6 flex justify-center">
+          <div className="mb-6 flex justify-center flex-wrap gap-x-2 gap-y-2"> {/* Añadir flex-wrap, gap-x-2, gap-y-2 */} 
             <ToggleGroup
               type="single"
               value={selectedRegion}
