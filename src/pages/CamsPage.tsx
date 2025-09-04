@@ -69,8 +69,6 @@ const STATIC_WEBCAMS: Webcam[] = [
     location: { city: "Waikiki" },
   },
   
-
-  
 ];
 
 const CamsPage = () => {
@@ -78,117 +76,159 @@ const CamsPage = () => {
   const [webcams, setWebcams] = useState<Webcam[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"cams" | "championships">("cams"); // Nuevo estado para el modo de vista
 
   useEffect(() => {
     setLoading(true);
     setError(null);
     const timer = setTimeout(() => {
-      let filteredCams = STATIC_WEBCAMS;
-      if (selectedRegion !== "all") {
-        filteredCams = STATIC_WEBCAMS.filter(cam => cam.region === selectedRegion);
+      if (viewMode === "cams") {
+        let filteredCams = STATIC_WEBCAMS;
+        if (selectedRegion !== "all") {
+          filteredCams = STATIC_WEBCAMS.filter(cam => cam.region === selectedRegion);
+        }
+        setWebcams(filteredCams);
+      } else {
+        setWebcams([]); // No mostrar cámaras si estamos en modo campeonatos
       }
-      setWebcams(filteredCams);
       setLoading(false);
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [selectedRegion]);
+  }, [selectedRegion, viewMode]); // Añadir viewMode a las dependencias
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6 text-foreground">Cámaras de Surf</h1>
+      <h1 className="text-3xl font-bold mb-6 text-foreground">En directo</h1>
 
-      <div className="mb-6 flex justify-center">
+      <div className="mb-6 flex justify-center mb-12">
         <ToggleGroup
           type="single"
-          value={selectedRegion}
-          onValueChange={(value: "all" | "europe" | "africa" | "northAmerica" | "southAmerica" | "asia" | "oceania") => {
-            if (value) setSelectedRegion(value);
+          value={viewMode} // Controlar el modo de vista
+          onValueChange={(value: "cams" | "championships") => {
+            if (value) setViewMode(value);
           }}
-          className="bg-card rounded-lg p-1 shadow-sm flex-wrap" // Añadir flex-wrap
+          className="bg-card rounded-lg p-1 shadow-sm"
         >
-          <ToggleGroupItem value="all" aria-label="Toggle Todas">
-            Todas
+          <ToggleGroupItem value="cams" aria-label="Toggle Cámaras de Surf">
+            Cámaras de Surf
           </ToggleGroupItem>
-          <ToggleGroupItem value="europe" aria-label="Toggle Europa">
-            Europa
-          </ToggleGroupItem>
-          <ToggleGroupItem value="africa" aria-label="Toggle África">
-            África
-          </ToggleGroupItem>
-          <ToggleGroupItem value="northAmerica" aria-label="Toggle América del Norte">
-            América del Norte
-          </ToggleGroupItem>
-          <ToggleGroupItem value="southAmerica" aria-label="Toggle América del Sur">
-            América del Sur
-          </ToggleGroupItem>
-          <ToggleGroupItem value="asia" aria-label="Toggle Asia">
-            Asia
-          </ToggleGroupItem>
-          <ToggleGroupItem value="oceania" aria-label="Toggle Oceanía">
-            Oceanía
+          <ToggleGroupItem value="championships" aria-label="Toggle Campeonatos Live">
+            Campeonatos Live
           </ToggleGroupItem>
         </ToggleGroup>
       </div>
 
-      {error && (
-        <div className="text-center text-red-500 mb-4">
-          <p>{error}</p>
-        </div>
-      )}
+      {viewMode === "cams" && (
+        <> 
+          <div className="mb-6 flex justify-center">
+            <ToggleGroup
+              type="single"
+              value={selectedRegion}
+              onValueChange={(value: "all" | "europe" | "africa" | "northAmerica" | "southAmerica" | "asia" | "oceania") => {
+                if (value) setSelectedRegion(value);
+              }}
+              className="bg-card rounded-lg p-1 shadow-sm flex-wrap"
+            >
+              <ToggleGroupItem value="all" aria-label="Toggle Todas">
+                Todas
+              </ToggleGroupItem>
+              <ToggleGroupItem value="europe" aria-label="Toggle Europa">
+                Europa
+              </ToggleGroupItem>
+              <ToggleGroupItem value="africa" aria-label="Toggle África">
+                África
+              </ToggleGroupItem>
+              <ToggleGroupItem value="northAmerica" aria-label="Toggle América del Norte">
+                América del Norte
+              </ToggleGroupItem>
+              <ToggleGroupItem value="southAmerica" aria-label="Toggle América del Sur">
+                América del Sur
+              </ToggleGroupItem>
+              <ToggleGroupItem value="asia" aria-label="Toggle Asia">
+                Asia
+              </ToggleGroupItem>
+              <ToggleGroupItem value="oceania" aria-label="Toggle Oceanía">
+                Oceanía
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
 
-      {loading && webcams.length === 0 && (
-        <div className="flex justify-center items-center h-48">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="ml-2 text-muted-foreground">Cargando cámaras...</p>
-        </div>
-      )}
+          {error && (
+            <div className="text-center text-red-500 mb-4">
+              <p>{error}</p>
+            </div>
+          )}
 
-      {!loading && webcams.length === 0 && !error && (
-        <div className="text-center text-muted-foreground h-48 flex items-center justify-center">
-          <p>No hay cámaras disponibles en esta región.</p>
-        </div>
-      )}
+          {loading && webcams.length === 0 && (
+            <div className="flex justify-center items-center h-48">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="ml-2 text-muted-foreground">Cargando cámaras...</p>
+            </div>
+          )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {webcams.map((webcam) => (
-          <Card key={webcam.id} className="overflow-hidden rounded-lg shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-lg">{webcam.name}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div
-                className="relative w-full"
-                style={{ paddingTop: "56.25%" }}
-              >
-                {webcam.type === "iframe" ? (
-                  <iframe
-                    src={webcam.embedUrl}
-                    title={`Webcam de ${webcam.name}`}
-                    className="absolute top-0 left-0 w-full h-full rounded-md"
-                    frameBorder="0"
-                    allowFullScreen
-                  ></iframe>
-                ) : (
-                  <img
-                    src={webcam.embedUrl}
-                    alt={`Webcam de ${webcam.name}`}
-                    className="absolute top-0 left-0 w-full h-full object-cover rounded-md"
-                  />
-                )}
-              </div>
-              {webcam.location && webcam.location.city && (
-                <p className="text-sm text-muted-foreground mt-2">
-                  Ciudad: {webcam.location.city}
-                  {webcam.location.latitude && webcam.location.longitude && (
-                    `, Lat: ${webcam.location.latitude.toFixed(2)}, Lon: ${webcam.location.longitude.toFixed(2)}`
+          {!loading && webcams.length === 0 && !error && (
+            <div className="text-center text-muted-foreground h-48 flex items-center justify-center">
+              <p>No hay cámaras disponibles en esta región.</p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {webcams.map((webcam) => (
+              <Card key={webcam.id} className="overflow-hidden rounded-lg shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-lg">{webcam.name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div
+                    className="relative w-full"
+                    style={{ paddingTop: "56.25%" }}
+                  >
+                    {webcam.type === "iframe" ? (
+                      <iframe
+                        src={webcam.embedUrl}
+                        title={`Webcam de ${webcam.name}`}
+                        className="absolute top-0 left-0 w-full h-full rounded-md"
+                        frameBorder="0"
+                        allowFullScreen
+                      ></iframe>
+                    ) : (
+                      <img
+                        src={webcam.embedUrl}
+                        alt={`Webcam de ${webcam.name}`}
+                        className="absolute top-0 left-0 w-full h-full object-cover rounded-md"
+                      />
+                    )}
+                  </div>
+                  {webcam.location && webcam.location.city && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Ciudad: {webcam.location.city}
+                      {webcam.location.latitude && webcam.location.longitude && (
+                        `, Lat: ${webcam.location.latitude.toFixed(2)}, Lon: ${webcam.location.longitude.toFixed(2)}`
+                      )}
+                    </p>
                   )}
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
+
+      {viewMode === "championships" && (
+        <div className="flex justify-center items-center h-96">
+          <iframe
+            width="800"
+            height="450"
+            src="https://www.youtube.com/embed/1gOxJkOZCKM?si=Aal3R0fLkZaaYvBY"
+            title="YouTube video player"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+          ></iframe>
+        </div>
+      )}
     </div>
   );
 };
