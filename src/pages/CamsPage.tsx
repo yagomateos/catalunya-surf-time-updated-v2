@@ -28,7 +28,14 @@ const STATIC_WEBCAMS: Webcam[] = [
     region: "europe",
     location: { city: "Laredo" },
   },
-  
+  {
+    id: "5", // Nuevo ID
+    name: "Cantabria", // Nuevo nombre
+    embedUrl: "https://www.youtube.com/embed/xdi4_E5zCKg?si=8Vjj02dBnzqCyyTa",
+    type: "iframe",
+    region: "europe", // Asumiendo que Cantabria está en Europa
+    location: { city: "Cantabria" },
+  },
   {
     id: "3",
     name: "Jeffreys Bay, Sudáfrica",
@@ -37,24 +44,7 @@ const STATIC_WEBCAMS: Webcam[] = [
     region: "africa", // Corregido a africa
     location: { city: "Jeffreys Bay" }, // Corregido a Jeffreys Bay
   },
-    {
-    id: "4",
-    name: "Deal, NJ, USA",
-    embedUrl: "https://www.youtube.com/embed/WLgPW0-dtp0?si=rIBzahGuZ4IRRmvc",
-    type: "iframe",
-    region: "northAmerica", // Corregido a africa
-    location: { city: "New Jersey" }, // Corregido a Jeffreys Bay
-  },
-  {
-    id: "5",
-    name: "Muizenberg, Sudáfrica",
-    embedUrl: "https://www.youtube.com/embed/wGY7hBIMVzU?si=IyxmaUOn0hG7Sa4",
-    type: "iframe",
-    region: "africa", // Corregido a africa
-    location: { city: "Muizenberg" }, // Corregido a Jeffreys Bay
-    },
 ];
-
 
 const CamsPage = () => {
   const [selectedRegion, setSelectedRegion] = useState<"all" | "europe" | "africa" | "northAmerica" | "southAmerica" | "asia" | "oceania">("all"); // Cambiar estado inicial y tipos
@@ -88,7 +78,7 @@ const CamsPage = () => {
           onValueChange={(value: "all" | "europe" | "africa" | "northAmerica" | "southAmerica" | "asia" | "oceania") => {
             if (value) setSelectedRegion(value);
           }}
-          className="bg-card rounded-lg p-1 shadow-sm" 
+          className="bg-card rounded-lg p-1 shadow-sm flex-wrap" // Añadir flex-wrap
         >
           <ToggleGroupItem value="all" aria-label="Toggle Todas">
             Todas
