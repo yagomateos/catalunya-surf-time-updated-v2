@@ -60,6 +60,16 @@ const STATIC_WEBCAMS: Webcam[] = [
     region: "europe", // Corregido a northAmerica
     location: { city: "Scarborough" },
   },
+  {
+    id: "6",
+    name: "Waikiki Aquarium South Shore, Hawái, USA",
+    embedUrl: "https://www.youtube.com/embed/6tHEWDnxj2Y?si=z2fAww7T_cmVUrAJ",
+    type: "iframe",
+    region: "oceania",
+    location: { city: "Waikiki" },
+  },
+  
+
   
 ];
 
