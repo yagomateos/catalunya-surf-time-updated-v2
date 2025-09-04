@@ -10,6 +10,7 @@ interface Webcam {
   name: string;
   embedUrl: string; // Cambiar a embedUrl
   type: "iframe" | "image"; // Añadir tipo para renderizado
+  region: "all" | "spain" | "southAfrica"; // Añadir propiedad de región
   location?: { // Hacer opcional
     city: string;
     latitude?: number;
@@ -21,47 +22,58 @@ interface Webcam {
 const STATIC_WEBCAMS: Webcam[] = [
   {
     id: "1",
-    name: "Laredo", // Cambiado a Laredo
+    name: "Laredo",
     embedUrl: "https://www.youtube.com/embed/xdi4_E5zCKg?si=N_0EvQl1O68GFtqs",
     type: "iframe",
-    location: { city: "Laredo" }, // Cambiado a Laredo
+    region: "spain", // Asignar región
+    location: { city: "Laredo" },
   },
   {
     id: "2",
-    name: "Muizenberg", // Nueva cámara
+    name: "Muizenberg",
     embedUrl: "https://www.youtube.com/embed/wGY7hBIMVzU?si=WJsIj5AzD_peMK_H",
     type: "iframe",
+    region: "southAfrica", // Asignar región
     location: { city: "Muizenberg" },
+  },
+  {
+    id: "3",
+    name: "Playa de Las Canteras, Las Palmas de Gran Canaria",
+    embedUrl: "https://www.youtube.com/embed/L5IQu7C3kRE?si=ZSKQo8aj4wwar62s",
+    type: "iframe",
+    region: "spain", // Asignar región
+    location: { city: "Las Palmas de Gran Canaria" },
+  },
+  {
+    id: "4",
+    name: "Steamer Lane, California",
+    embedUrl: "https://www.youtube.com/embed/bNLy-XXYxcw?si=-FeYf_NG2Gz-yjCB",
+    type: "iframe",
+    region: "all", // Asignar región (o una nueva si se quiere)
+    location: { city: "Santa Cruz, California" },
   },
 ];
 
 const CamsPage = () => {
-  const [selectedRegion, setSelectedRegion] = useState<"catalunya" | "paisVasco">("catalunya");
+  const [selectedRegion, setSelectedRegion] = useState<"all" | "spain" | "southAfrica">("all"); // Cambiar estado inicial y tipos
   const [webcams, setWebcams] = useState<Webcam[]>([]);
-  const [loading, setLoading] = useState(false); // Mantener loading para simular carga inicial
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // No necesitamos offset ni hasMore para cámaras estáticas
-  // const [offset, setOffset] = useState(0);
-  // const [hasMore = useState(true);
 
   useEffect(() => {
     setLoading(true);
     setError(null);
-    // Simular una carga asíncrona
     const timer = setTimeout(() => {
-      // Filtrar cámaras por región si es necesario, o mostrar todas
-      // Por ahora, mostramos todas las estáticas
-      setWebcams(STATIC_WEBCAMS);
+      let filteredCams = STATIC_WEBCAMS;
+      if (selectedRegion !== "all") {
+        filteredCams = STATIC_WEBCAMS.filter(cam => cam.region === selectedRegion);
+      }
+      setWebcams(filteredCams);
       setLoading(false);
-    }, 500); // Simular 0.5 segundos de carga
+    }, 500);
 
     return () => clearTimeout(timer);
-  }, [selectedRegion]); // selectedRegion podría usarse para filtrar STATIC_WEBCAMS si se categorizan por región
-
-  // No necesitamos handleLoadMore ni handleRetry para cámaras estáticas
-  // const handleLoadMore = () => { ... };
-  // const handleRetry = () => { ... };
+  }, [selectedRegion]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -71,16 +83,19 @@ const CamsPage = () => {
         <ToggleGroup
           type="single"
           value={selectedRegion}
-          onValueChange={(value: "catalunya" | "paisVasco") => {
+          onValueChange={(value: "all" | "spain" | "southAfrica") => {
             if (value) setSelectedRegion(value);
           }}
           className="bg-card rounded-lg p-1 shadow-sm"
         >
-          <ToggleGroupItem value="catalunya" aria-label="Toggle Cataluña">
-            Cataluña
+          <ToggleGroupItem value="all" aria-label="Toggle Todas">
+            Todas
           </ToggleGroupItem>
-          <ToggleGroupItem value="paisVasco" aria-label="Toggle País Vasco">
-            País Vasco
+          <ToggleGroupItem value="spain" aria-label="Toggle España">
+            España
+          </ToggleGroupItem>
+          <ToggleGroupItem value="southAfrica" aria-label="Toggle Sudáfrica">
+            Sudáfrica
           </ToggleGroupItem>
         </ToggleGroup>
       </div>
@@ -88,9 +103,6 @@ const CamsPage = () => {
       {error && (
         <div className="text-center text-red-500 mb-4">
           <p>{error}</p>
-          {/* <Button onClick={handleRetry} className="mt-2"> // Eliminar botón de reintentar
-            <RefreshCw className="mr-2 h-4 w-4" /> Reintentar
-          </Button> */}
         </div>
       )}
 
@@ -108,15 +120,15 @@ const CamsPage = () => {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {webcams.map((webcam) => ( // Eliminar index
-          <Card key={webcam.id} className="overflow-hidden rounded-lg shadow-lg"> {/* Usar webcam.id */}
+        {webcams.map((webcam) => (
+          <Card key={webcam.id} className="overflow-hidden rounded-lg shadow-lg">
             <CardHeader>
-              <CardTitle className="text-lg">{webcam.name}</CardTitle> {/* Usar webcam.name */}
+              <CardTitle className="text-lg">{webcam.name}</CardTitle>
             </CardHeader>
             <CardContent>
               <div
                 className="relative w-full"
-                style={{ paddingTop: "56.25%" }} // 16:9 aspect ratio
+                style={{ paddingTop: "56.25%" }}
               >
                 {webcam.type === "iframe" ? (
                   <iframe
@@ -146,16 +158,6 @@ const CamsPage = () => {
           </Card>
         ))}
       </div>
-
-      {/* Eliminar botón de cargar más */}
-      {/* {hasMore && !loading && webcams.length > 0 && (
-        <div className="text-center mt-8">
-          <Button onClick={handleLoadMore}>
-            <Loader2 className={loading ? "mr-2 h-4 w-4 animate-spin" : "mr-2 h-4 w-4 hidden"} />
-            Cargar más
-          </Button>
-        </div>
-      )} */}
     </div>
   );
 };
