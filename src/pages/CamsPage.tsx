@@ -22,11 +22,11 @@ interface Webcam {
 const STATIC_WEBCAMS: Webcam[] = [
   {
     id: "1",
-    name: "Laredo, España",
-    embedUrl: "https://www.youtube.com/embed/xdi4_E5zCKg?si=N_0EvQl1O68GFtqs",
+    name: "Muizemberg, Sudáfrica",
+    embedUrl: "https://www.youtube.com/embed/wGY7hBIMVzU?si=pNz2F8oOgb6AeRkl",
     type: "iframe",
-    region: "europe",
-    location: { city: "Laredo" },
+    region: "africa", // Corregido a southAmerica
+    location: { city: "Muizemberg" },
   },
   {
     id: "5", // Nuevo ID
