@@ -101,7 +101,7 @@ const CamsPage = () => {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6 text-foreground">En directo</h1>
 
-      <div className="mb-6 flex justify-center mb-12">
+      <div className="flex justify-center mb-12 gap-x-2  gap-y-2"> {/* Añadir gap-x-2 y gap-y-2 */}  
         <ToggleGroup
           type="single"
           value={viewMode} // Controlar el modo de vista
