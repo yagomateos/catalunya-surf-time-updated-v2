@@ -10,7 +10,7 @@ interface Webcam {
   name: string;
   embedUrl: string; // Cambiar a embedUrl
   type: "iframe" | "image"; // Añadir tipo para renderizado
-  region: "all" | "spain" | "southAfrica"; // Añadir propiedad de región
+  region: "all" | "europe" | "africa" | "northAmerica" | "southAmerica" | "asia" | "oceania"; // Añadir propiedad de región
   location?: { // Hacer opcional
     city: string;
     latitude?: number;
@@ -22,40 +22,42 @@ interface Webcam {
 const STATIC_WEBCAMS: Webcam[] = [
   {
     id: "1",
-    name: "Laredo",
+    name: "Laredo, España",
     embedUrl: "https://www.youtube.com/embed/xdi4_E5zCKg?si=N_0EvQl1O68GFtqs",
     type: "iframe",
-    region: "spain", // Asignar región
+    region: "europe",
     location: { city: "Laredo" },
   },
-  {
-    id: "2",
-    name: "Muizenberg",
-    embedUrl: "https://www.youtube.com/embed/wGY7hBIMVzU?si=WJsIj5AzD_peMK_H",
-    type: "iframe",
-    region: "southAfrica", // Asignar región
-    location: { city: "Muizenberg" },
-  },
+  
   {
     id: "3",
-    name: "Playa de Las Canteras, Las Palmas de Gran Canaria",
+    name: "Jeffreys Bay, Sudáfrica",
     embedUrl: "https://www.youtube.com/embed/L5IQu7C3kRE?si=ZSKQo8aj4wwar62s",
     type: "iframe",
-    region: "spain", // Asignar región
-    location: { city: "Las Palmas de Gran Canaria" },
+    region: "africa", // Corregido a africa
+    location: { city: "Jeffreys Bay" }, // Corregido a Jeffreys Bay
+  },
+    {
+    id: "4",
+    name: "Deal, NJ, USA",
+    embedUrl: "https://www.youtube.com/embed/WLgPW0-dtp0?si=rIBzahGuZ4IRRmvc",
+    type: "iframe",
+    region: "northAmerica", // Corregido a africa
+    location: { city: "New Jersey" }, // Corregido a Jeffreys Bay
   },
   {
-    id: "4",
-    name: "Steamer Lane, California",
-    embedUrl: "https://www.youtube.com/embed/bNLy-XXYxcw?si=-FeYf_NG2Gz-yjCB",
+    id: "5",
+    name: "Muizenberg, Sudáfrica",
+    embedUrl: "https://www.youtube.com/embed/wGY7hBIMVzU?si=IyxmaUOn0hG7Sa4",
     type: "iframe",
-    region: "all", // Asignar región (o una nueva si se quiere)
-    location: { city: "Santa Cruz, California" },
-  },
+    region: "africa", // Corregido a africa
+    location: { city: "Muizenberg" }, // Corregido a Jeffreys Bay
+    },
 ];
 
+
 const CamsPage = () => {
-  const [selectedRegion, setSelectedRegion] = useState<"all" | "spain" | "southAfrica">("all"); // Cambiar estado inicial y tipos
+  const [selectedRegion, setSelectedRegion] = useState<"all" | "europe" | "africa" | "northAmerica" | "southAmerica" | "asia" | "oceania">("all"); // Cambiar estado inicial y tipos
   const [webcams, setWebcams] = useState<Webcam[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -83,19 +85,31 @@ const CamsPage = () => {
         <ToggleGroup
           type="single"
           value={selectedRegion}
-          onValueChange={(value: "all" | "spain" | "southAfrica") => {
+          onValueChange={(value: "all" | "europe" | "africa" | "northAmerica" | "southAmerica" | "asia" | "oceania") => {
             if (value) setSelectedRegion(value);
           }}
-          className="bg-card rounded-lg p-1 shadow-sm"
+          className="bg-card rounded-lg p-1 shadow-sm" 
         >
           <ToggleGroupItem value="all" aria-label="Toggle Todas">
             Todas
           </ToggleGroupItem>
-          <ToggleGroupItem value="spain" aria-label="Toggle España">
-            España
+          <ToggleGroupItem value="europe" aria-label="Toggle Europa">
+            Europa
           </ToggleGroupItem>
-          <ToggleGroupItem value="southAfrica" aria-label="Toggle Sudáfrica">
-            Sudáfrica
+          <ToggleGroupItem value="africa" aria-label="Toggle África">
+            África
+          </ToggleGroupItem>
+          <ToggleGroupItem value="northAmerica" aria-label="Toggle América del Norte">
+            América del Norte
+          </ToggleGroupItem>
+          <ToggleGroupItem value="southAmerica" aria-label="Toggle América del Sur">
+            América del Sur
+          </ToggleGroupItem>
+          <ToggleGroupItem value="asia" aria-label="Toggle Asia">
+            Asia
+          </ToggleGroupItem>
+          <ToggleGroupItem value="oceania" aria-label="Toggle Oceanía">
+            Oceanía
           </ToggleGroupItem>
         </ToggleGroup>
       </div>
