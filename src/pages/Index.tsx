@@ -306,7 +306,7 @@ const Index = () => {
 
           {/* Surf Spots Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredSpots.slice(0, 8).map((spot) => (
+            {filteredSpots.slice(0, 20).map((spot) => (
               <SurfConditionsWrapper key={spot.id} spot={spot} />
             ))}
           </div>
