@@ -44,6 +44,14 @@ const STATIC_WEBCAMS: Webcam[] = [
     region: "africa", // Corregido a africa
     location: { city: "Jeffreys Bay" }, // Corregido a Jeffreys Bay
   },
+  {
+    id: "4",
+    name: "Deal, Nueva Jersey, USA",
+    embedUrl: "https://www.youtube.com/embed/WLgPW0-dtp0?si=c_bVCI34QVdoJkMq",
+    type: "iframe",
+    region: "northAmerica", // Corregido a northAmerica
+    location: { city: "Deal" },
+  },
 ];
 
 const CamsPage = () => {
